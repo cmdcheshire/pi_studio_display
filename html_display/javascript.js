@@ -7,7 +7,7 @@ var upNextUpdated = false;
 var recurringEvents = [];
 
 setInterval(function(){
-  readTextFile("./data/calendar.json", function(text){
+  readTextFile("data/calendar.json", function(text){
     var currentTime = Date.now();
     //console.log(currentTime);
     currentCalendar = JSON.parse(text);
@@ -24,7 +24,7 @@ setInterval(function(){
     // Find current event, if any
     calendarKeys.forEach((key) => {
       //console.log(`${currentCalendar[key].summary}`);
-      if ((`${currentCalendar[key].summary}`).includes("5th Fl")) { //////////// DEFINES KEYWORDS FOR DISPLAYING EVENTS
+      if ((`${currentCalendar[key].summary}`).includes("5th Fl") | (`${currentCalendar[key].summary}`).includes("5A")) { //////////// DEFINES KEYWORDS FOR DISPLAYING EVENTS
         //console.log(`${currentCalendar[key].summary}`)
         //Finds times of selected event
         var eventTime = Date.parse(`${currentCalendar[key].start}`);
@@ -77,7 +77,7 @@ setInterval(function(){
     //Checks recurring list for missed current events
     for (var k = 0; k < recurringEvents.length; k++) {
       //console.log(recurringEvents[k].name);
-      if (recurringEvents[k].name.includes("5th Fl")) {
+      if (recurringEvents[k].name.includes("5th Fl") | recurringEvents[k].name.includes("5A")) {
         if (recurringEvents[k].rawEnd > currentTime && recurringEvents[k].rawStart < currentTime && inUseUpdated === false) {
           console.log('Current event detected, updating...')
           currentEvent = recurringEvents[k];
@@ -90,7 +90,7 @@ setInterval(function(){
     // Finds next event
     calendarKeys.forEach((key, index) => {
       //console.log(`${currentCalendar[key].summary}`);
-      if ((`${currentCalendar[key].summary}`).includes("5th Fl")) { //////////// DEFINES KEYWORDS FOR DISPLAYING EVENTS
+      if ((`${currentCalendar[key].summary}`).includes("5th Fl") | (`${currentCalendar[key].summary}`).includes("5A")) { //////////// DEFINES KEYWORDS FOR DISPLAYING EVENTS
         //Finds times of selected event
         var eventTime = Date.parse(`${currentCalendar[key].start}`);
         var endTime = Date.parse(`${currentCalendar[key].end}`);
@@ -115,7 +115,7 @@ setInterval(function(){
     //Checks recurring list for missed next events
     for (var k = 0; k < recurringEvents.length; k++) {
       //console.log(recurringEvents[k].name);
-      if (recurringEvents[k].name.includes("5th Fl")) {
+      if (recurringEvents[k].name.includes("5th Fl") | recurringEvents[k].name.includes("5A")) {
         if (recurringEvents[k].rawStart > currentTime) {
           //Checks if there's already a next event and compares start times
           if (typeof nextEvent.start != "undefined" && recurringEvents[k].rawStart < nextEvent.start){
