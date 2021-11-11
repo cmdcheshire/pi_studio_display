@@ -28,6 +28,14 @@ const server = http.createServer(function (req, res) {
     });
 });
 
+server.listen(port, function (err) {
+    if (err) {
+        console.log('Something went wrong!', err);
+    } else {
+        console.log('Calendar data server is listening on port ' + port);
+    };
+});
+
 // Update calendar from outlook loop
 setInterval(function() {
     // Check for internet before updating file
@@ -36,9 +44,6 @@ setInterval(function() {
            console.log("No connection");
         } else {
             console.log("Connected");
-            server.close(function() {
-                console.log("Server restarting for new calendar file.")
-            });
             //Deletes old calendar file
             var calendarExists = fs.existsSync('./data/calendar.ics');
             console.log('calendar file exists? ' + calendarExists);
@@ -62,13 +67,6 @@ setInterval(function() {
                         throw err;
                     }
                     console.log("JSON data is saved.");
-                    server.listen(port, function (err) {
-                        if (err) {
-                            console.log('Something went wrong!', err);
-                        } else {
-                            console.log('Calendar data server is listening on port ' + port);
-                        };
-                    });
                 });
             });
         };
