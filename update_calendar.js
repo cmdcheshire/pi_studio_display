@@ -17,7 +17,7 @@ const server = http.createServer(function (req, res) {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Headers': '*'
     });
-    fs.readFile('data/calendar.json', function(error, data){
+    fs.readFile('./data/calendar.json', function(error, data){
         if (error) {
             res.writeHead(404);
             res.write('Error: File not Found');
@@ -40,24 +40,24 @@ setInterval(function() {
                 console.log("Server restarting for new calendar file.")
             });
             //Deletes old calendar file
-            var calendarExists = fs.existsSync('data/calendar.ics');
+            var calendarExists = fs.existsSync('./data/calendar.ics');
             console.log('calendar file exists? ' + calendarExists);
 
             if (calendarExists) {
-                fs.unlink('data/calendar.ics',function(err){
+                fs.unlink('./data/calendar.ics',function(err){
                     if(err) return console.log(err);
                     console.log('file deleted successfully');
                 });
             };
             //Download the current calendar and write to a json
-            download(calURL, 'data/calendar.ics', function (){
+            download(calURL, './data/calendar.ics', function (){
                 console.log('new calendar downloaded');
                 // use the sync function parseFile() to parse this ics file
-                const events = ical.sync.parseFile('data/calendar.ics');
+                const events = ical.sync.parseFile('./data/calendar.ics');
                 // convert object to JSON string
                 const eventsJSON = JSON.stringify(events);
                 // saves data to file
-                fs.writeFile('data/calendar.json', eventsJSON, (err) => {
+                fs.writeFile('./data/calendar.json', eventsJSON, (err) => {
                     if (err) {
                         throw err;
                     }
