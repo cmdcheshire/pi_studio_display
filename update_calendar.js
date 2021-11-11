@@ -7,6 +7,7 @@ const request = require('request');
 const http = require('http');
 
 var calURL = 'https://outlook.office365.com/owa/calendar/1ab3bbb901af444ea3250ea200edf6f8@foxsports.net/82dd488aa3e64886b0f9be2dee6371016084290547206369715/calendar.ics'
+var currentCal = {};
 const port = 9090;
 
 //Sets up server to host updated calendar
@@ -17,15 +18,18 @@ const server = http.createServer(function (req, res) {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Headers': '*'
     });
-    fs.readFile('./data/calendar.json', function(error, data){
-        if (error) {
-            res.writeHead(404);
-            res.write('Error: File not Found');
-        } else {
-            res.write(data);
-            res.end();
-        };
-    });
+    res.write(currentCal);
+    res.end;
+    // fs.readFile('./data/calendar.json', function(error, data){
+    //     if (error) {
+    //         res.writeHead(404);
+    //         res.write('Error: File not Found');
+    //     } else {
+    //         res.write(data);
+    //         console.log("Data written back to server.");
+    //         res.end();
+    //     };
+    // });
 });
 
 server.listen(port, function (err) {
@@ -61,6 +65,9 @@ setInterval(function() {
                 const events = ical.sync.parseFile('./data/calendar.ics');
                 // convert object to JSON string
                 const eventsJSON = JSON.stringify(events);
+                // updates local variable
+                currentCal = eventsJSON;
+                console.log('currentCal variable updated');
                 // saves data to file
                 fs.writeFile('./data/calendar.json', eventsJSON, (err) => {
                     if (err) {
