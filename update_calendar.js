@@ -1,11 +1,32 @@
-/// CALENDAR UPDATE LOOP, RUNS EVERY 30 SECONDS
+/// CALENDAR UPDATE LOOP, RUNS EVERY 10 SECONDS
 
 const https = require("https");
 const ical = require('node-ical');
 const fs = require('fs');
 const request = require('request');
+const http = require('http');
 
 var calURL = 'https://outlook.office365.com/owa/calendar/1ab3bbb901af444ea3250ea200edf6f8@foxsports.net/82dd488aa3e64886b0f9be2dee6371016084290547206369715/calendar.ics'
+const port = 9090;
+
+//Sets up server to host updated calendar
+const server = http.createServer(function (req, res) {
+    //Allows access from display http request on CORS
+    res.writeHead(200, { 
+        'Content-Type': 'text/json',  
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': '*'
+    });
+    fs.readFile('data/calendar.json', function(error, data){
+        if (error) {
+            res.writeHead(404);
+            res.write('Error: File not Found');
+        } else {
+            res.write(data);
+            res.end();
+        };
+    });
+});
 
 // Update calendar from outlook loop
 setInterval(function() {
@@ -15,34 +36,45 @@ setInterval(function() {
            console.log("No connection");
         } else {
             console.log("Connected");
+            server.close(function() {
+                console.log("Server restarting for new calendar file.")
+            });
             //Deletes old calendar file
-            var calendarExists = fs.existsSync('html_display/data/calendar.ics');
+            var calendarExists = fs.existsSync('data/calendar.ics');
             console.log('calendar file exists? ' + calendarExists);
 
             if (calendarExists) {
-                fs.unlink('html_display/data/calendar.ics',function(err){
+                fs.unlink('data/calendar.ics',function(err){
                     if(err) return console.log(err);
                     console.log('file deleted successfully');
                 });
             };
             //Download the current calendar and write to a json
-            download(calURL, 'html_display/data/calendar.ics', function (){
+            download(calURL, 'data/calendar.ics', function (){
                 console.log('new calendar downloaded');
                 // use the sync function parseFile() to parse this ics file
-                const events = ical.sync.parseFile('html_display/data/calendar.ics');
+                const events = ical.sync.parseFile('data/calendar.ics');
                 // convert object to JSON string
                 const eventsJSON = JSON.stringify(events);
                 // saves data to file
-                fs.writeFile('html_display/data/calendar.json', eventsJSON, (err) => {
+                fs.writeFile('data/calendar.json', eventsJSON, (err) => {
                     if (err) {
                         throw err;
                     }
                     console.log("JSON data is saved.");
+                    server.listen(port, function (err) {
+                        if (err) {
+                            console.log('Something went wrong!', err);
+                        } else {
+                            console.log('Calendar data server is listening on port ' + port);
+                        };
+                    });
                 });
             });
         };
       });
-}, 30000); //Calendar data updates every 30 seconds
+    
+}, 10000); //Calendar data updates every 10 seconds
 
 // Function definitions ===================================================================================
 

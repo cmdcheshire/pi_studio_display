@@ -7,7 +7,7 @@ var upNextUpdated = false;
 var recurringEvents = [];
 
 setInterval(function(){
-  readTextFile("data/calendar.json", function(text){
+  readTextFile("http://127.0.0.1:9090", function(text){
     var currentTime = Date.now();
     //console.log(currentTime);
     currentCalendar = JSON.parse(text);
