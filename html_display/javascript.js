@@ -11,7 +11,7 @@ setInterval(function(){
     var currentTime = Date.now();
     //console.log(currentTime);
     currentCalendar = JSON.parse(text);
-    //console.log(currentCalendar);
+    console.log(currentCalendar);
     calendarKeys = Object.keys(currentCalendar);
 
     //Remove calendar header data

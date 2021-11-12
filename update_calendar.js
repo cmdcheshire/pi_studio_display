@@ -30,10 +30,7 @@ setInterval(function() {
             };
             //Download the current calendar and write to a json
             downloading = true;
-            download(calURL, 'data/calendar.ics', function (err){
-                if (err) {
-                    console.log(err);
-                } else {
+            download(calURL, 'data/calendar.ics', function () {
                     console.log('new calendar downloaded');
                     // use the sync function parseFile() to parse this ics file
                     const events = ical.sync.parseFile('data/calendar.ics');
@@ -50,12 +47,11 @@ setInterval(function() {
                         }
                         console.log("JSON data is saved.");
                     });
-                };
             });
         };
       });
     
-}, 10000); //Calendar data updates every 10 seconds
+}, 15000); //Calendar data updates every 10 seconds
 
 // Function definitions ===================================================================================
 
