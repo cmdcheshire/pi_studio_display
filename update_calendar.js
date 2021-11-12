@@ -14,7 +14,7 @@ setInterval(function() {
         if (err) {
            console.log("No connection");
         } else {
-            console.log("Connected");
+            console.log("Internet connection verified");
             //Deletes old calendar file
             var calendarExists = fs.existsSync('data/calendar.ics');
             console.log('calendar file exists? ' + calendarExists);
@@ -28,17 +28,22 @@ setInterval(function() {
             //Download the current calendar and write to a json
             download(calURL, 'data/calendar.ics', function (){
                 console.log('new calendar downloaded');
-                // use the sync function parseFile() to parse this ics file
-                const events = ical.sync.parseFile('data/calendar.ics');
-                // convert object to JSON string
-                const eventsJSON = JSON.stringify(events);
-                // saves data to file
-                fs.writeFile('data/calendar.json', eventsJSON, (err) => {
-                    if (err) {
-                        throw err;
-                    }
-                    console.log("JSON data is saved.");
-                });
+                if (fs.existsSync('data/calendar.ics')) {
+                    console.log('file verified, converting...')
+                    // use the sync function parseFile() to parse this ics file
+                    const events = ical.sync.parseFile('data/calendar.ics');
+                    // convert object to JSON string
+                    const eventsJSON = JSON.stringify(events);
+                    // saves data to file
+                    fs.writeFile('data/calendar.json', eventsJSON, (err) => {
+                        if (err) {
+                            throw err;
+                        }
+                        console.log("JSON data is saved.");
+                    });
+                } else {
+                    console.log('file could not be verified');
+                };
             });
         };
       });
