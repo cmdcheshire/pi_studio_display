@@ -1,3 +1,7 @@
+# cal files
+*.ics
+calendar.json
+
 # Logs
 logs
 *.log
