@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "forever": "^4.0.1",
     "node-ical": "^0.14.1",
     "request": "^2.88.2"
   }
