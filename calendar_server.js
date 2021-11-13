@@ -9,7 +9,8 @@ const server = http.createServer(function (req, res) {
     res.writeHead(200, { 
         'Content-Type': 'application/json',  
         'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': '*'
+        'Access-Control-Allow-Headers': '*',
+        'Access-Control-Allow-Methods': 'PUT, POST, GET, DELETE, OPTIONS'
     });
 
     //USING JSON VARIABLE
