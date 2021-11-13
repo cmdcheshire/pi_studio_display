@@ -29,6 +29,9 @@ const server = http.createServer(function (req, res) {
             res.writeHead(404);
             res.write('Error: File not Found');
         } else {
+            res.header("Access-Control-Allow-Origin", "*");
+            res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+            res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');
             res.write(data);
             console.log("Data written back to server.");
             res.end();
