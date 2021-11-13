@@ -25,6 +25,7 @@ setInterval(function() {
                     console.log('file deleted successfully');
                 });
             };
+            console.log('t')
             //Download the current calendar and write to a json
             download(calURL, 'data/calendar.ics', function (){
                 console.log('new calendar downloaded');
@@ -55,7 +56,6 @@ setInterval(function() {
 function download(url, dest, cb) {
     return new Promise((resolve, reject) => {
         const file = fs.createWriteStream(dest, { flags: "wx" });
-
         const request = https.get(url, response => {
             if (response.statusCode === 200) {
                 response.pipe(file);
