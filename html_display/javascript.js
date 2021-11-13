@@ -18,6 +18,10 @@ setInterval(function(){
     calendarKeys.splice(0, 2);
 
     //Resets next event loop triggers
+    currentEvent = {};
+    console.log("current event reset");
+    nextEvent = {};
+    console.log("next event reset");
     inUseUpdated = false;
     upNextUpdated = false;
 
