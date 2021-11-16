@@ -22,6 +22,7 @@ setInterval(function(){
     console.log("current event reset");
     nextEvent = {};
     console.log("next event reset");
+    recurringEvents = [];
     inUseUpdated = false;
     upNextUpdated = false;
 
@@ -68,115 +69,153 @@ setInterval(function(){
             //console.log(newRecurrence);
             recurringEvents.push(newRecurrence);
           };
+
         } else {
           //console.log('No current event detected from individual listings...');
         };        
       };
     });
 
-    //Sorts recurring events by time
-    recurringEvents.sort((a, b) => a.rawStart - b.rawStart);
-    //console.log(recurringEvents);
+    // CHECKS FOR RECURRING EVENTS FROM EXPANDED EVENTS
+    readTextFile("http://127.0.0.1:9091", function(text){
+      //console.log(currentTime);
+      var expandedRecurrences = JSON.parse(text);
+      //console.log(expandedRecurrences);
 
-    //Checks recurring list for missed current events
-    for (var k = 0; k < recurringEvents.length; k++) {
-      //console.log(recurringEvents[k].name);
-      if (recurringEvents[k].name.includes("5th Fl") | recurringEvents[k].name.includes("5A")) {
-        if (recurringEvents[k].rawEnd > currentTime && recurringEvents[k].rawStart < currentTime && inUseUpdated === false) {
-          console.log('Current event detected, updating...')
-          currentEvent = recurringEvents[k];
-          //Stops looking for current event
-          inUseUpdated = true;
+      for (var i=0;i<expandedRecurrences.length;i++) {
+        //Puts recurrence time in JS Date format
+        var recurrenceStart = new Date();
+        recurrenceStart.setFullYear(expandedRecurrences[i].startDate.year);
+        recurrenceStart.setMonth(expandedRecurrences[i].startDate.month - 1); //iCal date starts at 1, JS date starts at 0
+        recurrenceStart.setDate(expandedRecurrences[i].startDate.day);
+        recurrenceStart.setHours(expandedRecurrences[i].startDate.hour, expandedRecurrences[i].startDate.minute, expandedRecurrences[i].startDate.second);
+        console.log(expandedRecurrences[i].summary);
+        var recurrenceEnd = new Date();
+        recurrenceEnd.setFullYear(expandedRecurrences[i].endDate.year);
+        recurrenceEnd.setMonth(expandedRecurrences[i].endDate.month - 1);
+        recurrenceEnd.setDate(expandedRecurrences[i].endDate.day);
+        recurrenceEnd.setHours(expandedRecurrences[i].endDate.hour, expandedRecurrences[i].endDate.minute, expandedRecurrences[i].endDate.second);
+        console.log(recurrenceEnd);
+
+        var newRecurrence = {
+          key: 'NA',
+          name: expandedRecurrences[i].summary,
+          start: recurrenceStart,
+          rawStart: Date.parse(recurrenceStart),
+          end: recurrenceEnd,
+          rawEnd: Date.parse(recurrenceEnd),
+          recurrence:true
+        };
+        recurringEvents.push(newRecurrence);
+
+      };
+
+      //Sorts recurring events by time
+      recurringEvents.sort(function(a, b){return a.rawStart-b.rawStart});
+      console.log("Recurring events in order:")
+      console.log(recurringEvents);
+
+      //Checks recurring list for missed current events
+      for (var k = 0; k < recurringEvents.length; k++) {
+        //console.log(recurringEvents[k].name);
+        if (recurringEvents[k].name.includes("5th Fl") | recurringEvents[k].name.includes("5A")) {
+          if (recurringEvents[k].rawEnd > currentTime && recurringEvents[k].rawStart < currentTime && inUseUpdated === false) {
+            console.log('Current event detected, updating...')
+            currentEvent = recurringEvents[k];
+            //Stops looking for current event
+            inUseUpdated = true;
+          };
         };
       };
-    };
 
-    // Finds next event
-    calendarKeys.forEach((key, index) => {
-      //console.log(`${currentCalendar[key].summary}`);
-      if ((`${currentCalendar[key].summary}`).includes("5th Fl") | (`${currentCalendar[key].summary}`).includes("5A")) { //////////// DEFINES KEYWORDS FOR DISPLAYING EVENTS
-        //Finds times of selected event
-        var eventTime = Date.parse(`${currentCalendar[key].start}`);
-        var endTime = Date.parse(`${currentCalendar[key].end}`);
-        //Sets next event, if not yet set
-        //console.log(currentTime);
-        if (eventTime > currentTime && upNextUpdated === false) {
-          //console.log(`${currentCalendar[key].summary}`);
-          nextEvent = {
-            key:`${key}`,
-            name:`${currentCalendar[key].summary}`,
-            start:Date.parse(`${currentCalendar[key].start}`),
-            end:`${currentCalendar[key].end}`
+      // Finds next event
+      calendarKeys.forEach((key, index) => {
+        //console.log(`${currentCalendar[key].summary}`);
+        if ((`${currentCalendar[key].summary}`).includes("5th Fl") | (`${currentCalendar[key].summary}`).includes("5A")) { //////////// DEFINES KEYWORDS FOR DISPLAYING EVENTS
+          //Finds times of selected event
+          var eventTime = Date.parse(`${currentCalendar[key].start}`);
+          var endTime = Date.parse(`${currentCalendar[key].end}`);
+          //Sets next event, if not yet set
+          //console.log(currentTime);
+          if (eventTime > currentTime && upNextUpdated === false) {
+            //console.log(`${currentCalendar[key].summary}`);
+            nextEvent = {
+              key:`${key}`,
+              name:`${currentCalendar[key].summary}`,
+              start:Date.parse(`${currentCalendar[key].start}`),
+              end:`${currentCalendar[key].end}`
+            };
+            //Stops looking for next event
+            upNextUpdated = true;
           };
-          //Stops looking for next event
-          upNextUpdated = true;
+          
         };
         
-      };
-      
-    });
+      });
 
-    //Checks recurring list for missed next events
-    for (var k = 0; k < recurringEvents.length; k++) {
-      //console.log(recurringEvents[k].name);
-      if (recurringEvents[k].name.includes("5th Fl") | recurringEvents[k].name.includes("5A")) {
-        if (recurringEvents[k].rawStart > currentTime) {
-          //Checks if there's already a next event and compares start times
-          if (typeof nextEvent.start != "undefined" && recurringEvents[k].rawStart < nextEvent.start){
-          console.log('Next event detected, updating...')
-          nextEvent = recurringEvents[k];
+      //Checks recurring list for missed next events
+      for (var k = 0; k < recurringEvents.length; k++) {
+        //console.log(recurringEvents[k].name);
+        if (recurringEvents[k].name.includes("5th Fl") | recurringEvents[k].name.includes("5A")) {
+          if (recurringEvents[k].rawStart > currentTime) {
+            //Checks if there's already a next event and compares start times
+            if (typeof nextEvent.start != "undefined" && recurringEvents[k].rawStart < nextEvent.start){
+            console.log('Next event detected, updating...')
+            nextEvent = recurringEvents[k];
+            };
+            //If there is no next event, this is next event
+            if (typeof nextEvent.start === "undefined") {
+            console.log('Next event detected, updating...')
+            nextEvent = recurringEvents[k];
+            };
+            //Stops looking for current event
+            upNextUpdated = true;
           };
-          //If there is no next event, this is next event
-          if (typeof nextEvent.start === "undefined") {
-          console.log('Next event detected, updating...')
-          nextEvent = recurringEvents[k];
-          };
-          //Stops looking for current event
-          upNextUpdated = true;
         };
       };
-    };
 
-    //Updates UI to reflect current event status
-    if (currentEvent.key) {
-      console.log('Current Event:');
-      console.log(currentEvent);
-      //Convert event time to local 12hr format
-      var startTime = new Date(currentEvent.start);
-      var simpleStartTime = startTime.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
-      var endTime = new Date(currentEvent.end);
-      var simpleEndTime = endTime.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
-      //Update current event metadata
-      document.getElementById('current-show-name').innerHTML = currentEvent.name;
-      document.getElementById('current-start-time').innerHTML = simpleStartTime;
-      document.getElementById('current-end-time').innerHTML = simpleEndTime;
-      //Switch to current event graphic
-      document.getElementById('in-use-wrapper').style.display = "block";
-      document.getElementById('open-wrapper').style.display = "none";
-      document.getElementById('body-wrapper').style.border = "10px solid red";
-    } else {
-      console.log('No current event detected.');
-      //Switch to studio open graphic
-      document.getElementById('in-use-wrapper').style.display = "none";
-      document.getElementById('open-wrapper').style.display = "block";
-      document.getElementById('body-wrapper').style.border = "10px solid limegreen";
-    };
+      //Updates UI to reflect current event status
+      if (currentEvent.key) {
+        console.log('Current Event:');
+        console.log(currentEvent);
+        //Convert event time to local 12hr format
+        var startTime = new Date(currentEvent.start);
+        var simpleStartTime = startTime.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+        var endTime = new Date(currentEvent.end);
+        var simpleEndTime = endTime.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+        //Update current event metadata
+        document.getElementById('current-show-name').innerHTML = currentEvent.name;
+        document.getElementById('current-start-time').innerHTML = simpleStartTime;
+        document.getElementById('current-end-time').innerHTML = simpleEndTime;
+        //Switch to current event graphic
+        document.getElementById('in-use-wrapper').style.display = "block";
+        document.getElementById('open-wrapper').style.display = "none";
+        document.getElementById('body-wrapper').style.border = "10px solid red";
+      } else {
+        console.log('No current event detected.');
+        //Switch to studio open graphic
+        document.getElementById('in-use-wrapper').style.display = "none";
+        document.getElementById('open-wrapper').style.display = "block";
+        document.getElementById('body-wrapper').style.border = "10px solid limegreen";
+      };
 
-    if (nextEvent.key) {
-      console.log('Next Event:');
-      console.log(nextEvent);
-      //Convert event time to local 12hr format
-      var startTime = new Date(nextEvent.start);
-      var simpleStartTime = startTime.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
-      var endTime = new Date(nextEvent.end);
-      var simpleEndTime = endTime.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
-      //Update next event metadata
-      document.getElementById('next-show-name').innerHTML = nextEvent.name;
-      document.getElementById('next-start-time').innerHTML = simpleStartTime;
-      document.getElementById('next-end-time').innerHTML = simpleEndTime;
-    } else {
-      //Change to studio open
-    };
+      if (nextEvent.key) {
+        console.log('Next Event:');
+        console.log(nextEvent);
+        //Convert event time to local 12hr format
+        var startTime = new Date(nextEvent.start);
+        var simpleStartTime = startTime.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+        var endTime = new Date(nextEvent.end);
+        var simpleEndTime = endTime.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+        //Update next event metadata
+        document.getElementById('next-show-name').innerHTML = nextEvent.name;
+        document.getElementById('next-start-time').innerHTML = simpleStartTime;
+        document.getElementById('next-end-time').innerHTML = simpleEndTime;
+      } else {
+        //Change to studio open
+      };
+
+    });
     
   });
 

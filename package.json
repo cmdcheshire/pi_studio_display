@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "forever": "^4.0.1",
+    "ical-expander": "^3.1.0",
     "node-ical": "^0.14.1",
     "request": "^2.88.2"
   }
