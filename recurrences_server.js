@@ -52,6 +52,6 @@ server.listen(port, function (err) {
     if (err) {
         console.log('Something went wrong!', err);
     } else {
-        console.log('Calendar data server is listening on port ' + port);
+        console.log('Recurring data server is listening on port ' + port);
     };
 });

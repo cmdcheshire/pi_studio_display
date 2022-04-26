@@ -91,6 +91,7 @@ setInterval(function() {
 
                     const mappedEvents = expanderEvents.events.map(e => ({ startDate: e.startDate, endDate: e.endDate, summary: e.summary }));
                     const mappedOccurrences = expanderEvents.occurrences.map(o => ({ startDate: o.startDate, endDate: o.endDate, summary: o.item.summary }));
+                    console.log(mappedOccurrences);
                     const allEvents = [].concat(mappedEvents, mappedOccurrences);
                     
                     // convert object to JSON string
@@ -119,7 +120,7 @@ setInterval(function() {
             });
         };
       });
-}, 15000); //Calendar data updates every 15 seconds
+}, 30000); //Calendar data updates every 30 seconds
 
 // Function definitions ===================================================================================
 
