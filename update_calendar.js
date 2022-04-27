@@ -31,9 +31,6 @@ setInterval(function() {
             console.log('t')
             //Download the current calendar and write to a json
             download(calURL, 'data/calendar.ics', function (){
-                console.log('new calendar downloaded');
-
-                
 
                 if (fs.existsSync('data/calendar.ics')) {
                     console.log('file verified, converting...')
@@ -86,8 +83,8 @@ setInterval(function() {
                     //Expands recurrences to JSON object
                     const ics = fs.readFileSync('data/calendar.ics', 'utf-8');
 
-                    const icalExpander = new IcalExpander({ ics, maxIterations: 1000 });
-                    const expanderEvents = icalExpander.between(new Date('2021-11-01T00:00:00.000Z'), new Date('2021-12-01T00:00:00.000Z'));
+                    const icalExpander = new IcalExpander({ ics, maxIterations: 10000 });
+                    const expanderEvents = icalExpander.between(new Date('2022-11-01T00:00:00.000Z'), new Date('2030-12-01T00:00:00.000Z'));
 
                     const mappedEvents = expanderEvents.events.map(e => ({ startDate: e.startDate, endDate: e.endDate, summary: e.summary }));
                     const mappedOccurrences = expanderEvents.occurrences.map(o => ({ startDate: o.startDate, endDate: o.endDate, summary: o.item.summary }));
@@ -110,7 +107,7 @@ setInterval(function() {
                     fs.writeFile('data/calendar_recurrences.json', allEventsJSON, (err) => {
                         if (err) {
                             throw err;
-                        }
+                        };
                         console.log("Recurrences data is saved.");
                     });
 
@@ -120,7 +117,7 @@ setInterval(function() {
             });
         };
       });
-}, 30000); //Calendar data updates every 30 seconds
+}, 120000); //Calendar data updates every 60 seconds
 
 // Function definitions ===================================================================================
 
@@ -134,7 +131,7 @@ function download(url, dest, cb) {
             } else {
                 file.close();
                 fs.unlink(dest, () => {}); // Delete temp file
-                reject(`Server responded with ${response.statusCode}: ${response.statusMessage}`);
+                reject(`Server responded with ${response.statusCode} ${response.statusMessage}`);
             }
         });
 
@@ -145,6 +142,7 @@ function download(url, dest, cb) {
         });
 
         file.on("finish", () => {
+            console.log('new calendar downloaded');
             resolve();
             file.close(cb);
         });
@@ -159,5 +157,6 @@ function download(url, dest, cb) {
                 reject(err.message);
             }
         });
-    });
-}
+
+    }).catch(err => console.error("Promise rejected. " + err));
+};
