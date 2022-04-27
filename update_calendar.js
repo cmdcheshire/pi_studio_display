@@ -83,12 +83,21 @@ setInterval(function() {
                     //Expands recurrences to JSON object
                     const ics = fs.readFileSync('data/calendar.ics', 'utf-8');
 
-                    const icalExpander = new IcalExpander({ ics, maxIterations: 10000 });
-                    const expanderEvents = icalExpander.between(new Date('2022-11-01T00:00:00.000Z'), new Date('2030-12-01T00:00:00.000Z'));
+                    //Maps dates for the next week
+                    const icalExpander = new IcalExpander({ ics, maxIterations: 1000 });
+                    var today = new Date();
+                    var yesterday = new Date();
+                    var plusOneWeek = new Date();
+                    yesterday = yesterday.setDate(today.getDate() - 1);
+                    plusOneWeek = plusOneWeek.setDate(today.getDate() + 7);
+                    //console.log(yesterday);
+                    //console.log(plusOneWeek);
+
+                    const expanderEvents = icalExpander.between(new Date(yesterday), new Date(plusOneWeek));
 
                     const mappedEvents = expanderEvents.events.map(e => ({ startDate: e.startDate, endDate: e.endDate, summary: e.summary }));
                     const mappedOccurrences = expanderEvents.occurrences.map(o => ({ startDate: o.startDate, endDate: o.endDate, summary: o.item.summary }));
-                    console.log(mappedOccurrences);
+                    //console.log(mappedOccurrences);
                     const allEvents = [].concat(mappedEvents, mappedOccurrences);
                     
                     // convert object to JSON string
@@ -117,7 +126,7 @@ setInterval(function() {
             });
         };
       });
-}, 120000); //Calendar data updates every 60 seconds
+}, 60000); //Calendar data updates every 60 seconds
 
 // Function definitions ===================================================================================
 
