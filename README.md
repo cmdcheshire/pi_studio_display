@@ -7,6 +7,6 @@ displays current and next event based on keywords from ICS calendar. Made for ra
 
 2. npm install in folder
 
-3. run run_display.sh
+3. set the run_display.sh script to run at startup with whatever method you choose
 
 boom, the display should be working
